@@ -96,4 +96,23 @@ with tab3:
             organization.add_service(service)
     #Output current state of the record being entered to screen
     st.subheader("Record Preview:")
-    st.write(organization.__dict__)
+    st.subheader('Main Info')
+    st.write("---")
+    #Create a series of dataframes based on the org dict
+    for key, value in organization.__dict__.items():
+        if key != 'services':
+            st.write(f'{key} : {value}')
+    st.subheader('Services Info')
+    st.write("---")
+    for service in organization.__dict__['services']:
+        st.write(service['name'])
+        if service['has_schedule']:
+            st.write("---")
+            daily_schedules = service['weekly_schedule']['daily_schedules']
+            #Output as a dataframe to the screen
+            df = pd.json_normalize(daily_schedules)
+            st.dataframe(df)
+
+    #Use this as the developer view
+    st.write('Developer View')
+    st.json(organization.__dict__, expanded=False)
