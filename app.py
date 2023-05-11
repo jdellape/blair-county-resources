@@ -6,7 +6,7 @@ from service import Service
 from weekly_schedule import WeeklySchedule
 from daily_schedule import DailySchedule, DailyMealSchedule
 
-tab3, tab2, tab1 = st.tabs(["Version 3", "Vesion 2", "Version 1"])
+tab1, tab2 = st.tabs(["Enter New Organization", "Report on Existing Organizations"])
 
 SERVICES_OPTIONS = []
 
@@ -21,18 +21,41 @@ SERVICES_ON_SCHEDULE_KEY_STRING_DICT = {'Food/Pantries':'food_pantries_','Food/M
 def create_day_bool(day, category_string):
     return st.checkbox(day, key=category_string + day)
 
+def create_editable_df_for_schedule_entry(has_meals, service_key):
+    is_available = []
+    days = []
+    meals = []
+    open_times = []
+    close_times = []
+    if has_meals:
+        for day in DAYS_OF_WEEK:
+            for meal in MEALS:
+                is_available.append(False)
+                days.append(day)
+                meals.append(meal)
+                open_times.append("")
+                close_times.append("")
+        df = pd.DataFrame(list(zip(days, meals, is_available, open_times, close_times)),
+        columns =['day', 'meal', 'available', 'beginning at', 'ending at'])
+        return st.experimental_data_editor(df, key=service_key + '_weekly_schedule')
+    else:
+        is_available = [False for x in DAYS_OF_WEEK]
+        open_times = ["" for x in DAYS_OF_WEEK]
+        close_times = ["" for x in DAYS_OF_WEEK]
+        df = pd.DataFrame(list(zip(DAYS_OF_WEEK, is_available, open_times, close_times)),
+        columns =['day', 'available', 'beginning at', 'ending at'])
+        return st.experimental_data_editor(df, key=service_key + '_weekly_schedule')
+        
 with open('available_services.txt') as f:
     for line in f.readlines():
         SERVICES_OPTIONS.append(line.strip())
 
-with tab3:
-    st.subheader('Enter Organization Information')
-    st.write("---")
-    st.markdown('Required Fields')
+with tab1:
+    st.header('Enter Organization Information')
+    st.subheader('Required Fields')
     name = st.text_input('Name')
     st.write('Location')
-    address_line_one = st.text_input('Address Line 1')
-    #address_line_two = st.text_input('Address Line 2')
+    address_line_one = st.text_input('Address')
     city = st.text_input('City')
     #state = st.text_input('State')
     zip_code = st.text_input('Zip Code')
@@ -41,7 +64,7 @@ with tab3:
     #We Now have all the required fields. Create an organization object
     organization = Organization(name, address_line_one, city, zip_code, phone_num)
 
-    st.markdown('Optional Fields')
+    st.subheader('Optional Fields')
 
     contact_name = st.text_input('Name of Contact')
     if contact_name:
@@ -51,63 +74,63 @@ with tab3:
         organization.set_email(email)
 
     #Move onto services data entry
-    st.subheader('Select Services Provided')
-    st.write("---")
+    st.header('Select Services Provided')
     for service in SERVICES_OPTIONS:
         service_checked = st.checkbox(service)
-        #TODO: Refactor this if / elif and nested logic.
-        #Proobably could refactor into a single if with an inner if
+
         #Outer if catches any items with a schedule
+        #TODO: Re-approach so that editable dataframe is leveraged for user entry of schedules
         if service_checked and service in SERVICES_ON_SCHEDULE:
             service_key_string = SERVICES_ON_SCHEDULE_KEY_STRING_DICT[service]
-
+            
             #create a weekly schedule object
             weekly_schedule = WeeklySchedule()
-            st.write(f'{service} Schedule: ' )
-            for day in DAYS_OF_WEEK:
-                day_flag = create_day_bool(day, service_key_string)
-                if day_flag:
-                    #Create a daily schedule
-                    #Inner if to handle if it is a meal schedule
-                    if service_key_string == 'food_meals_':
-                        for meal in MEALS:
-                            meal_flag = st.checkbox(meal, key='food_meals_'+ day + '_' + meal)
-                            if meal_flag:
-                                start_time = st.text_input(f'Beginning at what time?', key=service_key_string + day + '_'+ meal + '_start_time')
-                                stop_time = st.text_input(f'Ending at what time?', key=service_key_string + day + '_'+ meal + '_stop_time')
-                                daily_meal_schedule = DailyMealSchedule(day, start_time, stop_time, meal)
-                                st.write(daily_meal_schedule.__dict__)
-                                #add the daily meal schedule to the weekly schedule
-                                weekly_schedule.add_daily_schedule(daily_meal_schedule)
-                                st.write(weekly_schedule.__dict__)
-                    #Handle non meal related daily schedules
-                    else:
-                        start_time = st.text_input(f'Beginning at what time?', key=service_key_string + day + '_start_time')
-                        stop_time = st.text_input(f'Ending at what time?', key=service_key_string + day + '_stop_time')
-                        daily_schedule = DailySchedule(day, start_time, stop_time)
-                        weekly_schedule.add_daily_schedule(daily_schedule)
-            #Create the service, attach schedule to it, then attach service to organization
-            service = Service(service)
-            service.set_weekly_schedule(weekly_schedule)
-            organization.add_service(service)
+            #Editable df testing
+            editable_df = None
+            st.subheader(f"Enter Your {service} Schedule")
+            st.write(":red[PLEASE NOTE: You must mark the 'available' column for any time slots you offer the service for it to be submitted.]")
+            if service_key_string != 'food_meals_':
+                editable_df = create_editable_df_for_schedule_entry(False, service_key_string)
+                # st.write('Schedule Availability Preview')
+                # st.dataframe(editable_df[editable_df['available']==True])
+                for index, row in editable_df[editable_df['available']==True].iterrows():
+                    daily_meal_schedule = DailySchedule(row['day'], row['beginning at'], row['ending at'])
+                    weekly_schedule.add_daily_schedule(daily_meal_schedule)
+                #Create the service, attach schedule to it, then attach service to organization
+                service_obj = Service(service)
+                service_obj.set_weekly_schedule(weekly_schedule)
+                organization.add_service(service_obj)
+            else:
+                editable_df = create_editable_df_for_schedule_entry(True, service_key_string)
+                # st.write('Schedule Availability Preview')
+                # st.dataframe(editable_df[editable_df['available']==True])
+                for index, row in editable_df[editable_df['available']==True].iterrows():
+                    daily_meal_schedule = DailyMealSchedule(row['day'], row['beginning at'], row['ending at'], row['meal'])
+                    weekly_schedule.add_daily_schedule(daily_meal_schedule)
+                #Create the service, attach schedule to it, then attach service to organization
+                service_obj = Service(service)
+                service_obj.set_weekly_schedule(weekly_schedule)
+                organization.add_service(service_obj)
         #If it's not one of the above services, we disregard schedules and just add the service
         elif service_checked:
-            service = Service(service)
-            organization.add_service(service)
+            service_obj = Service(service)
+            organization.add_service(service_obj)
+
     #Output current state of the record being entered to screen
-    st.subheader("Record Preview:")
-    st.subheader('Main Info')
+    st.header("Record Preview:")
+    st.write('This is what will be stored in the database upon submission based upon the information entered above.')
+    st.subheader('General Information')
     st.write("---")
     #Create a series of dataframes based on the org dict
     for key, value in organization.__dict__.items():
         if key != 'services':
             st.write(f'{key} : {value}')
-    st.subheader('Services Info')
+    st.write("---")
+    st.subheader('Services Provided Information')
     st.write("---")
     for service in organization.__dict__['services']:
         st.write(service['name'])
         if service['has_schedule']:
-            st.write("---")
             daily_schedules = service['weekly_schedule']['daily_schedules']
             #Output as a dataframe to the screen
             df = pd.json_normalize(daily_schedules)
