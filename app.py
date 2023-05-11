@@ -135,7 +135,7 @@ with tab1:
             #Output as a dataframe to the screen
             df = pd.json_normalize(daily_schedules)
             st.dataframe(df)
-
+    st.write("---")
     #Use this as the developer view
     st.write('Developer View')
     st.json(organization.__dict__, expanded=False)
