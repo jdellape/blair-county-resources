@@ -5,6 +5,8 @@ from organization import Organization
 from service import Service
 from weekly_schedule import WeeklySchedule
 from daily_schedule import DailySchedule, DailyMealSchedule
+from google.cloud import firestore
+from google.oauth2 import service_account
 
 tab1, tab2 = st.tabs(["Enter New Organization", "Report on Existing Organizations"])
 
@@ -21,6 +23,13 @@ SERVICES_ON_SCHEDULE_KEY_STRING_DICT = {'Food/Pantries':'food_pantries_','Food/M
 def create_day_bool(day, category_string):
     return st.checkbox(day, key=category_string + day)
 
+def get_db_object():
+    key_dict = json.loads(st.secrets["textkey"])
+    creds = service_account.Credentials.from_service_account_info(key_dict)
+    db = firestore.Client(credentials=creds, project="streamlit-sources")
+    return db
+
+#TODO: Split this into multiple functions
 def create_editable_df_for_schedule_entry(has_meals, service_key):
     is_available = []
     days = []
@@ -61,8 +70,16 @@ with tab1:
     zip_code = st.text_input('Zip Code')
     phone_num = st.text_input('Phone Number')
 
+    #TODO: Add Hours of Operation Here
+    st.write('Hours of Operation')
+    hours_of_operation_df = create_editable_df_for_schedule_entry(False, 'hours_of_operation')
+    weekly_hours_of_operation_schedule = WeeklySchedule()
+    for index, row in hours_of_operation_df[hours_of_operation_df['available']==True].iterrows():
+        daily_hours_of_operation_schedule = DailySchedule(row['day'], row['beginning at'], row['ending at'])
+        weekly_hours_of_operation_schedule.add_daily_schedule(daily_hours_of_operation_schedule)
+
     #We Now have all the required fields. Create an organization object
-    organization = Organization(name, address_line_one, city, zip_code, phone_num)
+    organization = Organization(name, address_line_one, city, zip_code, phone_num, weekly_hours_of_operation_schedule)
 
     st.subheader('Optional Fields')
 
@@ -139,3 +156,55 @@ with tab1:
     #Use this as the developer view
     st.write('Developer View')
     st.json(organization.__dict__, expanded=False)
+
+    #Create ability to submit data to the firestore db collection
+    if st.button('Submit Data'):
+        #connect to db
+        db = get_db_object()
+        #Create the new doc record in firestore
+        doc_ref = db.collection("agencies").document(name)
+        doc_ref.set(organization.__dict__)
+
+with tab2:
+    #Allow user to fetch list of agencies if they provide a service the user specifies.
+    #Make connection to db
+    db = get_db_object()
+
+    agency_ref = db.collection("agencies")
+    #TODO: only do this operation once. No reason to do this every time the app refreshes.
+    agency_list = [doc.to_dict() for doc in agency_ref.stream()]
+
+    #filter the agency_list for only agencies that provide a given service
+    #Get a user specified service to search for
+    service_name_search = st.selectbox('SERVICE', options=SERVICES_OPTIONS)
+    
+    #Initialize an empty list, search through list of agencies, add any agencies meeting user search criteria and add to list to output to user
+    results_to_return = []
+    for agency in agency_list:
+        service_found = False
+        try:
+            services_list = agency['services']
+            for service in services_list:
+                if service['name']==service_name_search:
+                    service_found = True
+                    results_to_return.append(agency)
+        except:
+            pass
+
+    #Output search results to user
+    for agency in results_to_return:
+        st.subheader(agency['name'])
+        st.write(f"Adddress : {agency['address_line_one']}")
+        st.write(f"City : {agency['city']}")
+        st.write(f"Zip Code : {agency['zip_code']}")
+        st.write(f"Contact Name : {agency['contact_name']}")
+        st.write(f"Email : {agency['email']}")
+        st.subheader('Service Information')
+        for service in agency['services']:
+            st.write(service['name'])
+            if service['has_schedule']:
+                #TODO: refactor into a function. We do this in multiple places.
+                daily_schedules = service['weekly_schedule']['daily_schedules']
+                #Output as a dataframe to the screen
+                df = pd.json_normalize(daily_schedules)
+                st.dataframe(df)
