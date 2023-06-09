@@ -7,6 +7,7 @@ from weekly_schedule import WeeklySchedule
 from daily_schedule import DailySchedule, DailyMealSchedule
 from google.cloud import firestore
 from google.oauth2 import service_account
+#from streamlit_js_eval import streamlit_js_eval
 
 tab1, tab2 = st.tabs(["Enter New Organization", "Report on Existing Organizations"])
 
@@ -62,7 +63,7 @@ with open('available_services.txt') as f:
 with tab1:
     st.header('Enter Organization Information')
     st.subheader('Required Fields')
-    name = st.text_input('Name')
+    name = st.text_input('Name', key='org_name')
     st.write('Location')
     address_line_one = st.text_input('Address')
     city = st.text_input('City')
@@ -176,7 +177,7 @@ with tab2:
 
     #filter the agency_list for only agencies that provide a given service
     #Get a user specified service to search for
-    service_name_search = st.selectbox('SERVICE', options=SERVICES_OPTIONS)
+    service_name_search = st.selectbox('Select a Service', options=[""] + SERVICES_OPTIONS)
     
     #Initialize an empty list, search through list of agencies, add any agencies meeting user search criteria and add to list to output to user
     results_to_return = []
@@ -194,17 +195,19 @@ with tab2:
     #Output search results to user
     for agency in results_to_return:
         st.subheader(agency['name'])
-        st.write(f"Adddress : {agency['address_line_one']}")
-        st.write(f"City : {agency['city']}")
-        st.write(f"Zip Code : {agency['zip_code']}")
-        st.write(f"Contact Name : {agency['contact_name']}")
-        st.write(f"Email : {agency['email']}")
-        st.subheader('Service Information')
-        for service in agency['services']:
-            st.write(service['name'])
-            if service['has_schedule']:
-                #TODO: refactor into a function. We do this in multiple places.
-                daily_schedules = service['weekly_schedule']['daily_schedules']
-                #Output as a dataframe to the screen
-                df = pd.json_normalize(daily_schedules)
-                st.dataframe(df)
+        st.write(f"Phone #: ", agency['phone_num'])
+        with st.expander("See More Information"):
+            st.write(f"Adddress : {agency['address_line_one']}")
+            st.write(f"City : {agency['city']}")
+            st.write(f"Zip Code : {agency['zip_code']}")
+            st.write(f"Contact Name : {agency['contact_name']}")
+            st.write(f"Email : {agency['email']}")
+            st.subheader('Service Information')
+            for service in agency['services']:
+                st.write(service['name'])
+                if service['has_schedule']:
+                    #TODO: refactor into a function. We do this in multiple places.
+                    daily_schedules = service['weekly_schedule']['daily_schedules']
+                    #Output as a dataframe to the screen
+                    df = pd.json_normalize(daily_schedules)
+                    st.dataframe(df)
