@@ -6,3 +6,7 @@ class Service:
     def set_weekly_schedule(self, value):
         self.has_schedule = True
         self.weekly_schedule = value.__dict__
+
+    def set_schedule(self, value):
+        self.schedule = value
+        self.has_schedule = True
