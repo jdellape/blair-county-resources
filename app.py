@@ -121,6 +121,7 @@ with tab1:
     organization.set_contact(contact_name)
     email = st.text_input('Email')
     organization.set_email(email)
+    st.write("Schedule")
     hours_of_operation_df = get_editable_df_for_basic_schedule('hours_of_operation')
     organization.set_hours_of_operation(list(hours_of_operation_df.T.to_dict().values()))
 
@@ -234,11 +235,15 @@ with tab3:
             st.subheader(agency['name'])
             st.write(f"Phone #: ", agency['phone_num'])
             with st.expander("See More Information"):
-                st.write(f"Adddress : {agency['address_line_one']}")
+                st.write(f"Address : {agency['address_line_one']}")
                 st.write(f"City : {agency['city']}")
                 st.write(f"Zip Code : {agency['zip_code']}")
                 st.write(f"Contact Name : {agency['contact_name']}")
                 st.write(f"Email : {agency['email']}")
+                st.write('Schedule :')
+                hours_of_operation_from_db = pd.DataFrame.from_dict(agency['hours_of_operation'])
+                hours_of_operation_from_db = hours_of_operation_from_db[get_ordered_df_column_list('hours_of_operation_view')]
+                st.write(hours_of_operation_from_db)
                 st.subheader('Services')
                 for service in agency['services']:
                     st.write(service)
@@ -256,11 +261,15 @@ with tab3:
             st.subheader(agency['name'])
             st.write(f"Phone #: ", agency['phone_num'])
             with st.expander("See More Information"):
-                st.write(f"Adddress : {agency['address_line_one']}")
+                st.write(f"Address : {agency['address_line_one']}")
                 st.write(f"City : {agency['city']}")
                 st.write(f"Zip Code : {agency['zip_code']}")
                 st.write(f"Contact Name : {agency['contact_name']}")
                 st.write(f"Email : {agency['email']}")
+                st.write('Schedule :')
+                hours_of_operation_from_db = pd.DataFrame.from_dict(agency['hours_of_operation'])
+                hours_of_operation_from_db = hours_of_operation_from_db[get_ordered_df_column_list('hours_of_operation_view')]
+                st.write(hours_of_operation_from_db)
                 st.subheader('Services')
                 for service in agency['services']:
                     st.write(service)
@@ -285,11 +294,15 @@ with tab3:
                 st.subheader(agency['name'])
                 st.write(f"Phone #: ", agency['phone_num'])
                 with st.expander("See More Information"):
-                    st.write(f"Adddress : {agency['address_line_one']}")
+                    st.write(f"Address : {agency['address_line_one']}")
                     st.write(f"City : {agency['city']}")
                     st.write(f"Zip Code : {agency['zip_code']}")
                     st.write(f"Contact Name : {agency['contact_name']}")
                     st.write(f"Email : {agency['email']}")
+                    st.write('Schedule :')
+                    hours_of_operation_from_db = pd.DataFrame.from_dict(agency['hours_of_operation'])
+                    hours_of_operation_from_db = hours_of_operation_from_db[get_ordered_df_column_list('hours_of_operation_view')]
+                    st.write(hours_of_operation_from_db)
                     st.subheader('Services')
                     for service in agency['services']:
                         st.write(service)
