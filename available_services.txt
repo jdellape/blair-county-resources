@@ -1,6 +1,7 @@
 Appliances
 Behavioral/Mental Health/Counseling Services
-Childcare Services
+Computer/Printer Use
+Children's Services
 Clothing
 Crisis/Domestic Violence/Victim Services
 Dental Services
@@ -18,14 +19,15 @@ GED Services
 Haircuts
 Health Insurance/Medicaid
 Landlord Information
+Laundry Services
 Legal Services
 Library Services
 Medical Services
 Nutrition
 Phones
 Pregnancy/Pre-Natal Services
-Public Housing/Section 8 Information - Housing Counseling
-Public Housing/Section 8 Information - Public Housing Agencies
+Housing Counseling
+Housing Agencies
 Rent Payment Assistance
 Security Deposit Assistance
 Shelter Services
@@ -37,4 +39,5 @@ Utility Bill Payment Assistance
 Veteran's Services
 Vision Services
 Warming Center
+Weatherization
 Wifi Access
