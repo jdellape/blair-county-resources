@@ -1,8 +1,8 @@
 Appliances
 Behavioral/Mental Health/Counseling Services
-Computer/Printer Use
 Children's Services
 Clothing
+Computer/Printer Use
 Crisis/Domestic Violence/Victim Services
 Dental Services
 Disability Services
@@ -26,11 +26,11 @@ Medical Services
 Nutrition
 Phones
 Pregnancy/Pre-Natal Services
-Housing Counseling
 Housing Agencies
+Housing Counseling
 Rent Payment Assistance
 Security Deposit Assistance
-Shelter Services
+Shelters/Rehabilitation Centers
 Social Connections/Support Groups
 Storage
 Toiletries
