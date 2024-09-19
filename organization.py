@@ -19,6 +19,9 @@ class Organization:
     def set_hours_of_operation(self, value):
         self.hours_of_operation = value
 
+    def set_services_description(self, value):
+        self.services_description = value
+
     #Orgs povide an array of services
     #Service objects will contain weekly schedule objects (if applicable)
     def add_service(self, value):
