@@ -121,6 +121,8 @@ with tab1:
     organization.set_contact(contact_name)
     email = st.text_input('Email')
     organization.set_email(email)
+    services_description = st.text_area('Description of Services')
+    organization.set_services_description(services_description)
     st.write("Schedule")
     hours_of_operation_df = get_editable_df_for_basic_schedule('hours_of_operation')
     organization.set_hours_of_operation(list(hours_of_operation_df.T.to_dict().values()))
@@ -163,6 +165,7 @@ with tab2:
         city = st.text_input(label='City', value=agency['city'], key='city')
         zip_code = st.text_input(label='Zip Code', value=agency['zip_code'], key='zip_code')
         contact_name = st.text_input(label='Contact Name', value=agency['contact_name'], key='contact_name')
+        services_description = st.text_area('Description of Services', value=agency['services_description'], key='services_description')
         email = st.text_input(label='Email', value=agency['email'], key='email')
         hours_of_operation_schedule_for_input = None
         try:
@@ -180,6 +183,7 @@ with tab2:
         organization = Organization(agency_name_search, address_line_one, city, zip_code, phone_num)
         organization.set_contact(contact_name)
         organization.set_email(email)
+        organization.set_services_description(services_description)
         organization.set_hours_of_operation(list(hours_of_operation_schedule_for_input.T.to_dict().values()))
 
         #Begin handling services
@@ -240,6 +244,7 @@ with tab3:
                 st.write(f"Zip Code : {agency['zip_code']}")
                 st.write(f"Contact Name : {agency['contact_name']}")
                 st.write(f"Email : {agency['email']}")
+                st.write(f"Description of Services: {agency['services_description']}")
                 st.write('Schedule :')
                 hours_of_operation_from_db = pd.DataFrame.from_dict(agency['hours_of_operation'])
                 hours_of_operation_from_db = hours_of_operation_from_db[get_ordered_df_column_list('hours_of_operation_view')]
@@ -266,6 +271,7 @@ with tab3:
                 st.write(f"Zip Code : {agency['zip_code']}")
                 st.write(f"Contact Name : {agency['contact_name']}")
                 st.write(f"Email : {agency['email']}")
+                st.write(f"Description of Services: {agency['services_description']}")
                 st.write('Schedule :')
                 hours_of_operation_from_db = pd.DataFrame.from_dict(agency['hours_of_operation'])
                 hours_of_operation_from_db = hours_of_operation_from_db[get_ordered_df_column_list('hours_of_operation_view')]
@@ -299,6 +305,7 @@ with tab3:
                     st.write(f"Zip Code : {agency['zip_code']}")
                     st.write(f"Contact Name : {agency['contact_name']}")
                     st.write(f"Email : {agency['email']}")
+                    st.write(f"Description of Services: {agency['services_description']}")
                     st.write('Schedule :')
                     hours_of_operation_from_db = pd.DataFrame.from_dict(agency['hours_of_operation'])
                     hours_of_operation_from_db = hours_of_operation_from_db[get_ordered_df_column_list('hours_of_operation_view')]
