@@ -40,7 +40,7 @@ def get_editable_df_for_basic_schedule(service_key):
     close_times = ["" for x in DAYS_OF_WEEK]
     df = pd.DataFrame(list(zip(DAYS_OF_WEEK, is_available, open_times, close_times)),
     columns =['day', 'available', 'beginning at', 'ending at'])
-    return st.experimental_data_editor(df, key=service_key + '_weekly_schedule')   
+    return st.data_editor(df, key=service_key + '_weekly_schedule')   
 
 def get_editable_df_for_meal_schedule(service_key):
     is_available = []
@@ -57,7 +57,7 @@ def get_editable_df_for_meal_schedule(service_key):
             close_times.append("")
     df = pd.DataFrame(list(zip(days, meals, is_available, open_times, close_times)),
     columns =['day', 'meal', 'available', 'beginning at', 'ending at'])
-    return st.experimental_data_editor(df, key=service_key + '_weekly_schedule')   
+    return st.data_editor(df, key=service_key + '_weekly_schedule')   
 
 def get_service_list_intersection(db_doc_services_name_list):
     return set(SERVICES_OPTIONS).intersection(db_doc_services_name_list)
@@ -174,7 +174,7 @@ with tab2:
             hours_of_operation_df_from_db = hours_of_operation_df_from_db[get_ordered_df_column_list('hours_of_operation')]
             st.write('Schedule Previously Uploaded to Database:')
             #Convert to editable dataframe
-            hours_of_operation_schedule_for_input = st.experimental_data_editor(hours_of_operation_df_from_db, key='hours_of_operation_editable_df')
+            hours_of_operation_schedule_for_input = st.data_editor(hours_of_operation_df_from_db, key='hours_of_operation_editable_df')
         except:
             #Assign a new schedule for entry if it doesn't exist currently in db
             hours_of_operation_schedule_for_input = get_editable_df_for_basic_schedule('hours_of_operation_edit_screen')
@@ -203,7 +203,7 @@ with tab2:
                         schedule_df_from_db = schedule_df_from_db[get_ordered_df_column_list(name)]
                         st.write('Schedule Previously Uploaded to Database:')
                         #Convert to editable dataframe
-                        schedule_for_input = st.experimental_data_editor(schedule_df_from_db, key=name+'_editable_df')
+                        schedule_for_input = st.data_editor(schedule_df_from_db, key=name+'_editable_df')
                     except:
                         #Assign a new schedule for entry if it doesn't exist currently in db
                         schedule_for_input = get_schedule_entry_object_for_service(name)
